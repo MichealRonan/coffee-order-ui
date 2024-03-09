@@ -1,98 +1,91 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Order Confirmation</title>
     <style>
         body {
-        background-color: #cb943e;
-        margin: 0;
-        padding: 10px;
-        font-family: Arial, sans-serif;
+            background-color: #cb943e;
+            margin: 0;
+            padding: 10px;
+            font-family: Arial, sans-serif;
         }
 
         nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
         }
 
         a {
-        text-decoration: none;
-        color: #000;
-        display: block;
-        margin-bottom: 10px;
+            text-decoration: none;
+            color: #000;
+            display: block;
+            margin-bottom: 10px;
         }
 
-        a:last-child {
-        margin-bottom: 0;
-        }
-
-        a {
-        text-decoration: none;
-        color: #000;
-        display: block;
-        margin-bottom: 10px;
-        }
-
-        a:last-child {
-        margin-bottom: 0;
-        }
-        #links {
-        display: flex;
-        justify-content: flex-start;
-        gap: 15px;
-        }
         .receipt-line {
             margin-bottom: 5px;
         }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="index.html">Coffee Order System</a>
-        <div id="links">
-            <a href="orderstatus.html"><b>Order Status</b></a>
-        </div>
-    </nav>
-
-    <div class="receipt" id="receipt">
+<nav>
+    <a href="index.html">Coffee Order System</a>
+    <div id="links">
+        <a href="OrderStatus.html"><b>Order Status</b></a>
     </div>
+</nav>
 
-    <script>
-        window.addEventListener('DOMContentLoaded', (event) => {
-            const receiptElement = document.getElementById('receipt');
-            const selectedBeverage = sessionStorage.getItem('selectedBeverage');
-            const selectedCondiments = JSON.parse(sessionStorage.getItem('selectedCondiments') || '[]');
-            const orderId = '23';//hardocded ID for now (homework5)
-            const price = '$4.50';//Hardcoded price for now (homework5)
+<div id="receipt">
+    <div class="receipt-line"><span id="order-id">Order ID:</span></div>
+    <div class="receipt-line"><span id="order-details">Order Details:</span></div>
+    <div class="receipt-line"><span id="order-total">Order Total:</span></div>
+</div>
 
-            let orderIdElement = document.createElement('div');
-            orderIdElement.textContent = `Order ID: ${orderId}`;
-            orderIdElement.classList.add('receipt-line');
-            receiptElement.appendChild(orderIdElement);
+<script>
+    window.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const beverage = urlParams.get('beverage');
+        const condiments = urlParams.get('condiments');
 
+        const orderDetails = getOrderDetails(beverage, condiments);
+        document.getElementById('order-details').textContent = orderDetails;
 
-            let beverageElement = document.createElement('div');
-            beverageElement.textContent = `Beverage: ${selectedBeverage}`;
-            beverageElement.classList.add('receipt-line');
-            receiptElement.appendChild(beverageElement);
+        fetchOrderDetails(beverage, condiments);
+    });
 
-            if (selectedCondiments.length > 0) {
-                let condimentsElement = document.createElement('div');
-                condimentsElement.textContent = `Condiments: ${selectedCondiments.join(', ')}`;
-                condimentsElement.classList.add('receipt-line');
-                receiptElement.appendChild(condimentsElement);
-            }
+    function getOrderDetails(beverage, condiments) {
+        return `Beverage: ${beverage}, Condiments: ${condiments || 'None'}`;
+    }
 
-            let priceElement = document.createElement('div');
-            priceElement.textContent = `Price: ${price}`;
-            priceElement.classList.add('receipt-line');
-            receiptElement.appendChild(priceElement);
-        });
-    </script>
+    function fetchOrderDetails(beverage, condiments) {
+        const orderData = {
+            beverage: beverage,
+            condiments: condiments.split(',')
+        };
+
+        fetch('http://localhost:8082/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                setConfirmationDetails(data);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function setConfirmationDetails(orderData) {
+        document.getElementById("order-id").textContent = `Order ID: ${orderData.id}`;
+        document.getElementById("order-total").textContent = `Order Total: $${orderData.cost.toFixed(2)}`;
+    }
+</script>
 </body>
 </html>

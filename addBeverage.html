@@ -91,7 +91,7 @@
     <nav>
     <a href="index.html">Coffee Order System</a>
     <div id="links">
-        <a href="orderstatus.html"><b>Order Status</b></a>
+        <a href="OrderStatus.html"><b>Order Status</b></a>
     </div>
     </nav>
     <p id="msg">Select Your Beverage</p>
@@ -102,8 +102,7 @@
 
     <script>
         function selectBeverage(beverage) {
-            sessionStorage.setItem('selectedBeverage', beverage);
-            window.location.href = 'addCondiment.html';
+            window.location.href = 'addCondiment.html?beverage=' + encodeURIComponent(beverage);
         }
     </script>
 </body>
